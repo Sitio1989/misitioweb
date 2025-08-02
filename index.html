@@ -65,8 +65,8 @@
 
           const resumen = `Fecha/Hora: ${fechaHora}\nLatitud: ${lat}\nLongitud: ${lon}\nDirección aproximada: ${direccion}`;
 
-          //document.getElementById("ubicacion").innerText = resumen;
-          //document.getElementById("resultado").value = resumen;
+          document.getElementById("ubicacion").innerText = resumen;
+          document.getElementById("resultado").value = resumen;
 
           // Enviar automáticamente
           emailjs.sendForm('service_epkqnyh', 'template_65vhrq8', document.getElementById('contact-form'))
@@ -103,3 +103,4 @@
 
 </body>
 </html>
+
